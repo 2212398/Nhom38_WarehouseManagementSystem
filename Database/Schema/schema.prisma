@@ -1,0 +1,219 @@
+// This is your Prisma schema file
+// Learn more: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+// ============================================
+// MASTER DATA MODELS
+// ============================================
+
+model users {
+  id                   String         @id @default(uuid()) @db.Uuid
+  username             String         @unique @db.VarChar(100)
+  email                String         @unique @db.VarChar(255)
+  password_hash        String         @db.VarChar(255)
+  first_name           String?        @db.VarChar(100)
+  last_name            String?        @db.VarChar(100)
+  phone                String?        @db.VarChar(50)
+  default_warehouse_id String?        @db.Uuid
+  is_active            Boolean        @default(true)
+  is_verified          Boolean        @default(false)
+  last_login_at        DateTime?
+  password_changed_at  DateTime?
+  created_at           DateTime       @default(now())
+  updated_at           DateTime       @default(now()) @updatedAt
+  deleted_at           DateTime?
+  
+  // Relations
+  warehouse            warehouses?    @relation(fields: [default_warehouse_id], references: [id])
+  user_roles           user_roles[]
+  
+  @@index([email])
+  @@index([username])
+}
+
+model roles {
+  id               String             @id @default(uuid()) @db.Uuid
+  code             String             @unique @db.VarChar(50)
+  name             String             @db.VarChar(255)
+  description      String?            @db.Text
+  is_system_role   Boolean            @default(false)
+  created_at       DateTime           @default(now())
+  updated_at       DateTime           @default(now()) @updatedAt
+  
+  // Relations
+  role_permissions role_permissions[]
+  user_roles       user_roles[]
+}
+
+model permissions {
+  id               String             @id @default(uuid()) @db.Uuid
+  code             String             @unique @db.VarChar(100)
+  name             String             @db.VarChar(255)
+  resource         String?            @db.VarChar(100)
+  action           String?            @db.VarChar(50)
+  description      String?            @db.Text
+  created_at       DateTime           @default(now())
+  
+  // Relations
+  role_permissions role_permissions[]
+}
+
+model role_permissions {
+  id            String      @id @default(uuid()) @db.Uuid
+  role_id       String      @db.Uuid
+  permission_id String      @db.Uuid
+  created_at    DateTime    @default(now())
+  
+  // Relations
+  roles         roles       @relation(fields: [role_id], references: [id], onDelete: Cascade)
+  permissions   permissions @relation(fields: [permission_id], references: [id], onDelete: Cascade)
+  
+  @@unique([role_id, permission_id])
+}
+
+model user_roles {
+  id         String   @id @default(uuid()) @db.Uuid
+  user_id    String   @db.Uuid
+  role_id    String   @db.Uuid
+  created_at DateTime @default(now())
+  
+  // Relations
+  users      users    @relation(fields: [user_id], references: [id], onDelete: Cascade)
+  roles      roles    @relation(fields: [role_id], references: [id], onDelete: Cascade)
+  
+  @@unique([user_id, role_id])
+}
+
+model product_categories {
+  id          String               @id @default(uuid()) @db.Uuid
+  code        String               @unique @db.VarChar(50)
+  name        String               @db.VarChar(255)
+  parent_id   String?              @db.Uuid
+  description String?              @db.Text
+  level       Int                  @default(1)
+  path        String?              @db.VarChar(500)
+  created_at  DateTime             @default(now())
+  updated_at  DateTime             @default(now()) @updatedAt
+  deleted_at  DateTime?
+  
+  // Relations
+  parent      product_categories?  @relation("CategoryHierarchy", fields: [parent_id], references: [id])
+  children    product_categories[] @relation("CategoryHierarchy")
+  products    products[]
+  
+  @@index([parent_id])
+  @@index([path])
+}
+
+model products {
+  id                String           @id @default(uuid()) @db.Uuid
+  sku               String           @unique @db.VarChar(100)
+  name              String           @db.VarChar(255)
+  description       String?          @db.Text
+  category_id       String?          @db.Uuid
+  base_uom_id       String?          @db.Uuid
+  weight            Decimal?         @db.Decimal(10, 3)
+  weight_uom        String?          @db.VarChar(10)
+  length            Decimal?         @db.Decimal(10, 2)
+  width             Decimal?         @db.Decimal(10, 2)
+  height            Decimal?         @db.Decimal(10, 2)
+  dimension_uom     String?          @db.VarChar(10)
+  volume            Decimal?         @db.Decimal(10, 3)
+  hs_code           String?          @db.VarChar(20)
+  country_of_origin String?          @db.VarChar(3)
+  storage_type      String?          @db.VarChar(20)
+  is_serialized     Boolean          @default(false)
+  is_lot_controlled Boolean          @default(false)
+  shelf_life_days   Int?
+  stock_strategy    String           @default("FIFO") @db.VarChar(20)
+  abc_class         String?          @db.VarChar(1)
+  unit_cost         Decimal?         @db.Decimal(15, 2)
+  unit_price        Decimal?         @db.Decimal(15, 2)
+  primary_image_url String?          @db.VarChar(500)
+  image_urls        Json?
+  is_active         Boolean          @default(true)
+  created_at        DateTime         @default(now())
+  updated_at        DateTime         @default(now()) @updatedAt
+  created_by        String?          @db.Uuid
+  updated_by        String?          @db.Uuid
+  deleted_at        DateTime?
+  version           Int              @default(1)
+  
+  // Relations
+  category          product_categories? @relation(fields: [category_id], references: [id])
+  base_uom          uom?                @relation("ProductBaseUom", fields: [base_uom_id], references: [id])
+  
+  @@index([sku])
+  @@index([category_id])
+  @@index([abc_class])
+}
+
+model uom {
+  id         String    @id @default(uuid()) @db.Uuid
+  code       String    @unique @db.VarChar(20)
+  name       String    @db.VarChar(100)
+  uom_type   String    @db.VarChar(20)
+  created_at DateTime  @default(now())
+  deleted_at DateTime?
+  
+  // Relations
+  products   products[] @relation("ProductBaseUom")
+}
+
+model warehouses {
+  id             String    @id @default(uuid()) @db.Uuid
+  code           String    @unique @db.VarChar(50)
+  name           String    @db.VarChar(255)
+  type           String?   @db.VarChar(20)
+  address_line1  String?   @db.VarChar(255)
+  address_line2  String?   @db.VarChar(255)
+  city           String?   @db.VarChar(100)
+  state          String?   @db.VarChar(100)
+  postal_code    String?   @db.VarChar(20)
+  country        String?   @db.VarChar(3)
+  latitude       Decimal?  @db.Decimal(10, 8)
+  longitude      Decimal?  @db.Decimal(11, 8)
+  phone          String?   @db.VarChar(50)
+  email          String?   @db.VarChar(255)
+  manager_id     String?   @db.Uuid
+  total_capacity Decimal?  @db.Decimal(15, 2)
+  capacity_uom   String?   @db.VarChar(10)
+  is_active      Boolean   @default(true)
+  created_at     DateTime  @default(now())
+  updated_at     DateTime  @default(now()) @updatedAt
+  deleted_at     DateTime?
+  
+  // Relations
+  users          users[]
+}
+
+// ============================================
+// Add more models as needed...
+// This is a starter schema
+// ============================================
+
+model audit_logs {
+  id            String   @id @default(uuid()) @db.Uuid
+  table_name    String   @db.VarChar(100)
+  record_id     String?  @db.Uuid
+  action        String   @db.VarChar(20)
+  old_values    Json?
+  new_values    Json?
+  performed_by  String?  @db.Uuid
+  performed_at  DateTime @default(now())
+  ip_address    String?  @db.Inet
+  user_agent    String?  @db.Text
+  
+  @@index([table_name])
+  @@index([record_id])
+  @@index([performed_by])
+  @@index([performed_at])
+}

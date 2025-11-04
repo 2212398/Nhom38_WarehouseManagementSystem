@@ -1,5 +1,3 @@
-version: '3.8'
-
 services:
   # PostgreSQL Database
   postgres:
@@ -55,7 +53,7 @@ services:
       JWT_SECRET: wms-super-secret-jwt-key-demo-2025
       CORS_ORIGIN: http://localhost:3001,http://localhost:80,http://localhost
     ports:
-      - '127.0.0.1:3000:3000'
+      - '3000:3000'
     depends_on:
       postgres:
         condition: service_healthy

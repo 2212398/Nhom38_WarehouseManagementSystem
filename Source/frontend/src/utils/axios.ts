@@ -1,6 +1,6 @@
 import axios, { AxiosError, AxiosInstance, InternalAxiosRequestConfig } from 'axios';
 
-const API_BASE_URL = process.env.REACT_APP_API_URL || 'http://127.0.0.1:3000/api/v1';
+const API_BASE_URL = process.env.REACT_APP_API_URL || '/api/v1';
 
 const axiosInstance: AxiosInstance = axios.create({
   baseURL: API_BASE_URL,

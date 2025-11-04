@@ -16,6 +16,6 @@ router.use('/kpi', kpiReportRoutes);
 
 // Dashboards
 import dashboardRoutes from './routes/dashboard.routes';
-router.use('/dashboards', dashboardRoutes);
+router.use('/dashboard', dashboardRoutes);
 
 export default router;

@@ -4,7 +4,8 @@ const router = Router();
 
 // Sales Order routes
 import soRoutes from './routes/so.routes';
-router.use('/sales-orders', soRoutes);
+router.use('/so', soRoutes);
+router.use('/sales-orders', soRoutes); // Alias for compatibility
 
 // Wave routes
 import waveRoutes from './routes/wave.routes';

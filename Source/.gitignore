@@ -1,0 +1,69 @@
+# Dependencies
+node_modules/
+*/node_modules/
+
+# Build outputs
+dist/
+build/
+*/dist/
+*/build/
+*.tsbuildinfo
+
+# Logs
+logs/
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+lerna-debug.log*
+*/logs/
+
+# Runtime data
+pids
+*.pid
+*.seed
+*.pid.lock
+
+# Coverage directory
+coverage/
+*.lcov
+.nyc_output
+
+# Environment variables
+.env
+.env.local
+.env.*.local
+*.env
+
+# Cache
+.cache/
+.parcel-cache/
+.eslintcache
+.node_repl_history
+*/node_modules/.cache/
+
+# OS
+.DS_Store
+Thumbs.db
+*.swp
+*.swo
+*~
+
+# IDE
+.vscode/
+.idea/
+*.sublime-*
+*.code-workspace
+
+# Prisma
+prisma/migrations/**/migration.sql
+!prisma/migrations/migration_lock.toml
+
+# Docker volumes
+*.vol
+volumes/
+
+# Temporary files
+tmp/
+temp/
+*.tmp

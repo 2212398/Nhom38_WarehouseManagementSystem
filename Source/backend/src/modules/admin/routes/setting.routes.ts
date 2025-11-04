@@ -1,13 +1,9 @@
 import { Router } from 'express';
+import settingController from '../controllers/setting.controller';
 
 const router = Router();
 
-router.get('/', (_req, res) => {
-  res.json({ success: true, message: 'Setting routes - To be implemented' });
-});
-
-router.put('/:key', (_req, res) => {
-  res.json({ success: true, message: 'Update setting - To be implemented' });
-});
+router.get('/', settingController.getAll.bind(settingController));
+router.put('/', settingController.update.bind(settingController));
 
 export default router;

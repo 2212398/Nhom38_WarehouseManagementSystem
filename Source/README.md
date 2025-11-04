@@ -1,386 +1,512 @@
-# Source Code Documentation
+# 🏭 Warehouse Management System (WMS)
+
+> Hệ thống quản lý kho hiện đại với Node.js + TypeScript + PostgreSQL + Redis + Docker
+
+[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
+[![Node](https://img.shields.io/badge/Node.js-18+-green.svg)](https://nodejs.org/)
+[![TypeScript](https://img.shields.io/badge/TypeScript-5.3+-blue.svg)](https://www.typescriptlang.org/)
+[![Docker](https://img.shields.io/badge/Docker-Ready-blue.svg)](https://www.docker.com/)
+
+---
+
+## 📋 Giới thiệu
+
+Warehouse Management System (WMS) là hệ thống quản lý kho toàn diện, giúp tự động hóa và tối ưu hóa các quy trình:
+- 📦 Nhập hàng (Inbound): PO, ASN, Receiving, Putaway, QC
+- 📤 Xuất hàng (Outbound): SO, Picking, Packing, Shipping, Returns
+- 📊 Quản lý tồn kho (Inventory): Stock, Adjustment, Transfer, Cycle Count
+- 🏢 Dữ liệu chính (Master Data): Products, Locations, Warehouses, Suppliers, Customers
+- 📈 Báo cáo (Reporting): Dashboard, KPI, Operations, Inventory Reports
+- 👥 Quản trị (Admin): Users, Roles, Permissions, Audit Logs
+
+---
+
+## ✨ Tính năng chính
+
+### 🎯 Core Features
+- ✅ Multi-warehouse support
+- ✅ Location-based inventory tracking
+- ✅ Purchase Order & Sales Order management
+- ✅ Real-time stock updates
+- ✅ Barcode/QR scanning ready
+- ✅ Quality Control (QC) workflow
+- ✅ Wave picking optimization
+- ✅ Return merchandise authorization (RMA)
+- ✅ Cycle counting & inventory adjustment
+- ✅ Inter-warehouse transfers
+
+### 🔐 Security
+- ✅ JWT authentication
+- ✅ Role-Based Access Control (RBAC)
+- ✅ Password encryption (bcrypt)
+- ✅ Rate limiting & DDoS protection
+- ✅ CORS configuration
+- ✅ Helmet security headers
+- ✅ Audit logging
+
+### ⚡ Performance
+- ✅ Redis caching
+- ✅ Database indexing
+- ✅ Query optimization with Prisma
+- ✅ Compression middleware
+- ✅ Connection pooling
+- ✅ Pagination support
+
+### 🛠️ Developer Experience
+- ✅ TypeScript for type safety
+- ✅ Prisma ORM for database
+- ✅ RESTful API design
+- ✅ Swagger/OpenAPI documentation
+- ✅ Docker containerization
+- ✅ Environment-based configuration
+- ✅ Structured logging (Winston)
+- ✅ Hot-reload development
+
+---
+
+## 🏗️ Kiến trúc
+
+```
+┌─────────────────────────────────────────────────────────┐
+│                     Client (Browser)                     │
+└────────────────────┬────────────────────────────────────┘
+                     │ HTTPS
+┌────────────────────▼────────────────────────────────────┐
+│              Nginx Reverse Proxy                         │
+└──────────┬──────────────────────────────────────────────┘
+           │
+    ┌──────┴──────┐
+    │             │
+    ▼             ▼
+┌────────┐   ┌─────────────────────────────────┐
+│Frontend│   │   Backend API (Express.js)       │
+│ (SPA)  │   │   - TypeScript                   │
+│        │   │   - RESTful API                  │
+└────────┘   │   - Socket.IO (Real-time)        │
+             └──────────┬──────────────────────┘
+                        │
+        ┌───────────────┼───────────────┐
+        │               │               │
+        ▼               ▼               ▼
+┌──────────────┐  ┌──────────┐  ┌──────────┐
+│  PostgreSQL  │  │  Redis   │  │  MinIO   │
+│  (Database)  │  │ (Cache)  │  │ (S3-like)│
+└──────────────┘  └──────────┘  └──────────┘
+```
+
+### Tech Stack
+
+**Backend:**
+- Node.js 18+ & TypeScript 5.3+
+- Express.js (Web framework)
+- Prisma (ORM)
+- PostgreSQL (Database)
+- Redis (Cache & Session)
+- Socket.IO (Real-time)
+- JWT (Authentication)
+- Winston (Logging)
+- Zod (Validation)
+
+**Frontend:**
+- React / Vue / Angular (TBD)
+- Nginx (Web server)
+
+**DevOps:**
+- Docker & Docker Compose
+- MinIO (Object storage)
+- Nginx (Reverse proxy)
+
+---
+
+## 🚀 Quick Start
+
+### Yêu cầu
+- Node.js 18+
+- Docker Desktop (khuyên dùng)
+- PostgreSQL 14+ (nếu không dùng Docker)
+- Redis 7+ (optional)
+
+### Chạy với Docker (Khuyên dùng)
+
+```powershell
+# 1. Copy environment file
+cd backend
+Copy-Item .env.example .env
+
+# 2. Chạy tất cả services
+cd ..
+docker-compose up --build
+
+# 3. Truy cập
+# Frontend: http://localhost:3001
+# Backend: http://localhost:3000/api/v1
+# API Docs: http://localhost:3000/api-docs
+```
+
+### Chạy local (Development)
+
+```powershell
+# 1. Backend setup
+cd backend
+Copy-Item .env.example .env
+npm install
+npm run prisma:generate
+npm run prisma:migrate
+npm run prisma:seed
+
+# 2. Chạy backend
+npm run dev
+
+# 3. Frontend setup (trong terminal khác)
+cd ../frontend
+npm install
+npm run dev
+```
+
+**Chi tiết đầy đủ**: Xem file [SETUP_GUIDE.md](./SETUP_GUIDE.md)
+
+**Quick start**: Xem file [QUICKSTART.md](./QUICKSTART.md)
+
+---
 
 ## 📁 Cấu trúc thư mục
 
 ```
 Source/
-└── backend/              # Backend API (Node.js + Express + TypeScript)
-    ├── src/
-    │   ├── modules/     # Business modules
-    │   │   ├── auth/           # Authentication & Authorization
-    │   │   ├── master-data/    # Master data management
-    │   │   ├── inbound/        # Inbound operations
-    │   │   ├── inventory/      # Inventory management
-    │   │   ├── outbound/       # Outbound operations
-    │   │   ├── reporting/      # Reports & Analytics
-    │   │   └── admin/          # System administration
-    │   ├── shared/      # Shared utilities
-    │   │   ├── cache/          # Redis cache client
-    │   │   ├── database/       # Prisma client
-    │   │   ├── middlewares/    # Express middlewares
-    │   │   └── utils/          # Utility functions
-    │   ├── routes/      # API routes
-    │   ├── config/      # Configuration files
-    │   └── server.ts    # Application entry point
-    ├── prisma/          # Prisma schema
-    ├── dist/            # Compiled JavaScript (generated)
-    └── node_modules/    # Dependencies
+├── backend/                    # Backend API
+│   ├── prisma/
+│   │   └── schema.prisma      # Database schema
+│   ├── src/
+│   │   ├── server.ts          # Entry point
+│   │   ├── config/            # Configurations
+│   │   ├── modules/           # Business logic modules
+│   │   │   ├── auth/          # Authentication
+│   │   │   ├── inbound/       # Inbound operations
+│   │   │   ├── outbound/      # Outbound operations
+│   │   │   ├── inventory/     # Inventory management
+│   │   │   ├── master-data/   # Master data
+│   │   │   ├── reporting/     # Reports & analytics
+│   │   │   └── admin/         # Admin functions
+│   │   ├── routes/            # API routes
+│   │   └── shared/            # Shared utilities
+│   │       ├── database/      # Prisma client
+│   │       ├── cache/         # Redis client
+│   │       ├── middlewares/   # Express middlewares
+│   │       └── utils/         # Helper functions
+│   ├── logs/                  # Application logs
+│   ├── uploads/               # File uploads
+│   ├── .env.example           # Environment template
+│   ├── Dockerfile             # Docker image
+│   ├── package.json           # Dependencies
+│   └── tsconfig.json          # TypeScript config
+│
+├── frontend/                   # Frontend application
+│   ├── Dockerfile
+│   ├── nginx.conf
+│   └── package.json
+│
+├── nginx/                      # Nginx reverse proxy config
+│   └── nginx.conf
+│
+├── docker-compose.yml          # Docker orchestration
+├── SETUP_GUIDE.md             # Setup hướng dẫn chi tiết
+├── QUICKSTART.md              # Quick start guide
+├── OPTIMIZATION_GUIDE.md      # Tối ưu hướng dẫn
+└── README.md                  # File này
 ```
 
-## 🚀 Backend API
+---
 
-### Technology Stack
-- **Runtime**: Node.js 18+
-- **Framework**: Express.js 4.18+
-- **Language**: TypeScript 5.3+
-- **Database ORM**: Prisma 5.6+
-- **Cache**: Redis (ioredis)
-- **Authentication**: JWT
-- **Validation**: Zod
-- **Documentation**: Swagger/OpenAPI
-- **Real-time**: Socket.io
-- **Logging**: Winston
+## 🔌 API Endpoints
 
-### Setup Instructions
-
-#### 1. Install Dependencies
-```bash
-cd Source/backend
-npm install
+### Authentication
+```
+POST   /api/v1/auth/login          # Login
+POST   /api/v1/auth/register       # Register
+POST   /api/v1/auth/refresh        # Refresh token
+POST   /api/v1/auth/logout         # Logout
 ```
 
-#### 2. Environment Configuration
-```bash
-cp .env.example .env
+### Inbound
+```
+GET    /api/v1/inbound/po          # List purchase orders
+POST   /api/v1/inbound/po          # Create PO
+GET    /api/v1/inbound/po/:id      # Get PO details
+PUT    /api/v1/inbound/po/:id      # Update PO
+DELETE /api/v1/inbound/po/:id      # Delete PO
+
+POST   /api/v1/inbound/receiving   # Receive goods
+POST   /api/v1/inbound/putaway     # Putaway to locations
+POST   /api/v1/inbound/qc          # Quality check
 ```
 
-Cấu hình file `.env`:
-```env
-# Server
-NODE_ENV=development
-PORT=3000
-API_VERSION=v1
-
-# Database
-DATABASE_URL=postgresql://postgres:postgres@localhost:5432/wms_db
-
-# Redis
-REDIS_HOST=localhost
-REDIS_PORT=6379
-
-# JWT
-JWT_SECRET=your-super-secret-key
-JWT_EXPIRES_IN=7d
-REFRESH_TOKEN_SECRET=your-refresh-secret
-REFRESH_TOKEN_EXPIRES_IN=30d
-
-# CORS
-CORS_ORIGIN=http://localhost:3001
+### Outbound
+```
+GET    /api/v1/outbound/so         # List sales orders
+POST   /api/v1/outbound/so         # Create SO
+POST   /api/v1/outbound/pick       # Create picking tasks
+POST   /api/v1/outbound/pack       # Pack items
+POST   /api/v1/outbound/shipping   # Ship orders
+POST   /api/v1/outbound/returns    # Process returns
 ```
 
-#### 3. Database Setup
-```bash
-# Generate Prisma Client
-npx prisma generate
-
-# Run migrations
-npx prisma migrate dev
-
-# Seed data (optional)
-npm run prisma:seed
+### Inventory
+```
+GET    /api/v1/inventory/stock                # View stock
+POST   /api/v1/inventory/adjustment          # Adjust inventory
+POST   /api/v1/inventory/transfer            # Transfer stock
+POST   /api/v1/inventory/cycle-count         # Cycle counting
+GET    /api/v1/inventory/stock/location/:id  # Stock by location
 ```
 
-#### 4. Start Development Server
-```bash
-npm run dev
+### Master Data
+```
+GET    /api/v1/master-data/products    # Products
+GET    /api/v1/master-data/warehouses  # Warehouses
+GET    /api/v1/master-data/locations   # Locations
+GET    /api/v1/master-data/suppliers   # Suppliers
+GET    /api/v1/master-data/customers   # Customers
+GET    /api/v1/master-data/carriers    # Carriers
 ```
 
-Server sẽ chạy tại: `http://localhost:3000`
-
-### Available Scripts
-
-```json
-{
-  "dev": "nodemon --exec ts-node src/server.ts",
-  "build": "tsc",
-  "start": "node dist/server.js",
-  "prisma:generate": "prisma generate",
-  "prisma:migrate": "prisma migrate dev",
-  "prisma:studio": "prisma studio",
-  "test": "jest",
-  "lint": "eslint src --ext .ts",
-  "lint:fix": "eslint src --ext .ts --fix"
-}
+### Reporting
+```
+GET    /api/v1/reporting/dashboard           # Dashboard metrics
+GET    /api/v1/reporting/inventory-report    # Inventory reports
+GET    /api/v1/reporting/kpi-report          # KPI reports
+GET    /api/v1/reporting/operations-report   # Operations reports
 ```
 
-### API Endpoints
-
-#### Authentication
-- `POST /api/v1/auth/register` - Đăng ký user mới
-- `POST /api/v1/auth/login` - Đăng nhập
-- `POST /api/v1/auth/refresh` - Refresh access token
-- `POST /api/v1/auth/logout` - Đăng xuất
-- `GET /api/v1/auth/me` - Lấy thông tin user hiện tại
-
-#### Master Data
-- `GET /api/v1/master-data/products` - Danh sách sản phẩm
-- `POST /api/v1/master-data/products` - Tạo sản phẩm mới
-- `GET /api/v1/master-data/warehouses` - Danh sách kho
-- `GET /api/v1/master-data/suppliers` - Danh sách nhà cung cấp
-- `GET /api/v1/master-data/customers` - Danh sách khách hàng
-
-#### Inbound
-- `GET /api/v1/inbound/po` - Purchase Orders
-- `GET /api/v1/inbound/asn` - Advanced Shipping Notice
-- `GET /api/v1/inbound/receiving` - Receiving operations
-- `GET /api/v1/inbound/qc` - Quality Control
-- `GET /api/v1/inbound/putaway` - Putaway tasks
-
-#### Inventory
-- `GET /api/v1/inventory/stock` - Stock levels
-- `GET /api/v1/inventory/transfer` - Stock transfers
-- `GET /api/v1/inventory/adjustment` - Stock adjustments
-- `GET /api/v1/inventory/cycle-count` - Cycle counting
-- `GET /api/v1/inventory/replenishment` - Replenishment
-
-#### Outbound
-- `GET /api/v1/outbound/so` - Sales Orders
-- `GET /api/v1/outbound/wave` - Wave management
-- `GET /api/v1/outbound/pick` - Picking operations
-- `GET /api/v1/outbound/pack` - Packing operations
-- `GET /api/v1/outbound/shipping` - Shipping operations
-
-#### Reporting
-- `GET /api/v1/reports/inventory-report` - Inventory reports
-- `GET /api/v1/reports/operations-report` - Operations reports
-- `GET /api/v1/reports/kpi-report` - KPI reports
-- `GET /api/v1/reports/dashboard` - Dashboard data
-
-#### Administration
-- `GET /api/v1/admin/users` - User management
-- `GET /api/v1/admin/roles` - Role management
-- `GET /api/v1/admin/permissions` - Permission management
-- `GET /api/v1/admin/audit-logs` - Audit logs
-- `GET /api/v1/admin/settings` - System settings
-
-### API Documentation
-Swagger UI available at: `http://localhost:3000/api-docs`
-
-### Health Check
-`GET /health` - Returns server health status
-
-### Module Structure
-
-Mỗi module tuân theo cấu trúc:
+### Admin
 ```
-module-name/
-├── module-name.routes.ts    # Main route file
-├── routes/                  # Sub-routes
-│   ├── entity1.routes.ts
-│   └── entity2.routes.ts
-├── controllers/             # Request handlers (to be implemented)
-├── services/                # Business logic (to be implemented)
-└── validators/              # Input validation (to be implemented)
+GET    /api/v1/admin/users          # User management
+GET    /api/v1/admin/roles          # Role management
+GET    /api/v1/admin/permissions    # Permission management
+GET    /api/v1/admin/audit-logs     # Audit logs
+GET    /api/v1/admin/settings       # System settings
 ```
 
-### Middleware Stack
+**Full API Documentation**: http://localhost:3000/api-docs
 
-1. **helmet** - Security headers
-2. **cors** - Cross-origin resource sharing
-3. **compression** - Response compression
-4. **express.json** - Body parsing
-5. **rateLimiter** - Rate limiting
-6. **requestLogger** - Request logging
-7. **authMiddleware** - JWT authentication (protected routes)
-8. **errorHandler** - Centralized error handling
+---
 
-### Authentication Flow
+## 🗄️ Database Schema
 
-```
-1. User → POST /api/v1/auth/login
-2. Server validates credentials
-3. Server generates JWT access token + refresh token
-4. Client stores tokens
-5. Client sends access token in Authorization header
-6. Server validates token via authMiddleware
-7. Request proceeds to route handler
-```
+### Core Tables
 
-### Error Handling
+**Master Data:**
+- `users`, `roles`, `permissions`, `role_permissions`, `user_roles`
+- `warehouses`, `locations`, `zones`
+- `products`, `product_variants`, `units_of_measure`
+- `suppliers`, `customers`, `carriers`
 
-Sử dụng `AppError` class:
-```typescript
-throw new AppError('Resource not found', 404);
-```
+**Inbound:**
+- `purchase_orders`, `purchase_order_items`
+- `advance_ship_notices`, `asn_items`
+- `receiving_records`, `receiving_items`
+- `putaway_tasks`, `qc_inspections`
 
-Errors được xử lý bởi `errorHandler` middleware và trả về:
-```json
-{
-  "success": false,
-  "message": "Error message",
-  "stack": "..." // Only in development
-}
-```
+**Outbound:**
+- `sales_orders`, `sales_order_items`
+- `picking_tasks`, `picking_items`
+- `packing_records`, `packing_items`
+- `shipments`, `shipment_items`
+- `returns`, `return_items`
+- `waves`
 
-### Logging
+**Inventory:**
+- `stocks`, `stock_movements`
+- `adjustments`, `adjustment_items`
+- `cycle_counts`, `cycle_count_items`
+- `transfers`, `transfer_items`
+- `replenishments`, `kitting`
 
-Winston logger với 3 levels:
-- `logger.info()` - Informational messages
-- `logger.warn()` - Warnings
-- `logger.error()` - Errors
+**System:**
+- `audit_logs`, `alerts`, `settings`
+- `notifications`, `files`
 
-Logs được lưu tại:
-- `logs/combined.log` - All logs
-- `logs/error.log` - Errors only
-
-### Caching Strategy
-
-Redis được sử dụng cho:
-- Session management
-- Rate limiting
-- Temporary data storage
-
-Helper functions:
-```typescript
-cacheHelper.get(key)
-cacheHelper.set(key, value, ttl)
-cacheHelper.del(key)
-cacheHelper.exists(key)
-```
-
-## 🔒 Security
-
-### Implemented
-- ✅ Helmet.js for security headers
-- ✅ CORS protection
-- ✅ Rate limiting
-- ✅ JWT authentication
-- ✅ Password hashing (bcrypt)
-- ✅ Input validation
-- ✅ SQL injection prevention (Prisma)
-- ✅ Audit logging
-
-### To Implement
-- ⏳ OAuth2 integration
-- ⏳ Two-factor authentication (2FA)
-- ⏳ API key management
-- ⏳ CSRF protection
-- ⏳ Content Security Policy
-
-## 📝 Development Guidelines
-
-### Code Style
-- Use TypeScript strict mode
-- Follow ESLint rules
-- Use Prettier for formatting
-- Write meaningful commit messages
-
-### Naming Conventions
-- Files: `kebab-case.ts`
-- Classes: `PascalCase`
-- Functions/variables: `camelCase`
-- Constants: `UPPER_SNAKE_CASE`
-
-### Git Workflow
-```bash
-# Create feature branch
-git checkout -b feature/your-feature
-
-# Make changes and commit
-git add .
-git commit -m "feat: add new feature"
-
-# Push to remote
-git push origin feature/your-feature
-
-# Create Pull Request
-```
+---
 
 ## 🧪 Testing
 
-### Unit Tests
-```bash
-npm run test
-```
+```powershell
+# Run all tests
+npm test
 
-### Test Coverage
-```bash
+# Run with coverage
 npm run test:coverage
+
+# Watch mode
+npm run test:watch
 ```
 
-## 📦 Deployment
+---
 
-### Build for Production
-```bash
-npm run build
+## 📊 Monitoring & Logs
+
+### Logs
+```powershell
+# Xem logs (Docker)
+docker-compose logs -f backend
+
+# Xem log files (local)
+tail -f backend/logs/app.log
+tail -f backend/logs/error.log
 ```
 
-### Start Production Server
-```bash
-npm start
+### Health Check
+```powershell
+curl http://localhost:3000/health
 ```
+
+### Prisma Studio (Database GUI)
+```powershell
+cd backend
+npm run prisma:studio
+# Open: http://localhost:5555
+```
+
+---
+
+## 🔧 Configuration
 
 ### Environment Variables
-Đảm bảo set đúng biến môi trường trong production:
-- `NODE_ENV=production`
-- `DATABASE_URL` - Production database
-- `JWT_SECRET` - Strong secret key
-- `REDIS_URL` - Production Redis
 
-## 🔄 Database Migrations
+Xem file `.env.example` để biết tất cả biến môi trường:
 
-### Create Migration
-```bash
-npx prisma migrate dev --name migration_name
+**Core:**
+- `NODE_ENV` - Environment (development/production)
+- `PORT` - API port (default: 3000)
+- `DATABASE_URL` - PostgreSQL connection string
+- `REDIS_HOST`, `REDIS_PORT` - Redis configuration
+
+**Security:**
+- `JWT_SECRET` - JWT signing secret
+- `JWT_EXPIRES_IN` - Token expiration
+- `CORS_ORIGIN` - Allowed origins
+
+**Features:**
+- `MAX_FILE_SIZE` - Upload size limit
+- `DEFAULT_PAGE_SIZE` - Pagination size
+- `LOW_STOCK_THRESHOLD` - Stock alert threshold
+
+---
+
+## 📚 Documentation
+
+- [Setup Guide](./SETUP_GUIDE.md) - Hướng dẫn cài đặt chi tiết
+- [Quick Start](./QUICKSTART.md) - Bắt đầu nhanh
+- [Optimization Guide](./OPTIMIZATION_GUIDE.md) - Tối ưu kích thước
+- [API Docs](http://localhost:3000/api-docs) - Swagger/OpenAPI (khi chạy)
+- [Defense Questions](../DEFENSE_QUESTIONS.md) - Câu hỏi vấn đáp
+
+---
+
+## 🤝 Contributing
+
+1. Fork the repository
+2. Create your feature branch (`git checkout -b feature/AmazingFeature`)
+3. Commit your changes (`git commit -m 'Add some AmazingFeature'`)
+4. Push to the branch (`git push origin feature/AmazingFeature`)
+5. Open a Pull Request
+
+---
+
+## 📝 Scripts
+
+### Development
+```powershell
+npm run dev              # Start development server
+npm run build            # Build for production
+npm start                # Start production server
 ```
 
-### Apply Migrations (Production)
-```bash
-npx prisma migrate deploy
+### Database
+```powershell
+npm run prisma:generate  # Generate Prisma Client
+npm run prisma:migrate   # Run migrations
+npm run prisma:studio    # Open Prisma Studio
+npm run prisma:seed      # Seed sample data
 ```
 
-### Reset Database
-```bash
-npx prisma migrate reset
+### Code Quality
+```powershell
+npm run lint             # Lint code
+npm run lint:fix         # Fix lint issues
+npm run format           # Format code
+npm test                 # Run tests
 ```
 
-## 📊 Monitoring
+---
 
-### Recommended Tools
-- **APM**: New Relic, DataDog
-- **Logging**: ELK Stack, Splunk
-- **Error Tracking**: Sentry
-- **Uptime**: UptimeRobot, Pingdom
+## 🐛 Troubleshooting
 
-## 🚧 Current Implementation Status
+### Common Issues
 
-### ✅ Completed
-- Project structure
-- Authentication & Authorization
-- All route placeholders
-- Middleware stack
-- Error handling
-- Logging system
-- Database schema
-- Prisma integration
-- Redis integration
-- Swagger documentation structure
+**Port already in use:**
+```powershell
+# Đổi PORT trong .env
+PORT=3001
+```
 
-### ⏳ To Implement
-- Controller implementations
-- Service layer
-- Input validation schemas
-- Unit tests
-- Integration tests
-- API documentation (Swagger annotations)
-- File upload handling
-- Email notifications
-- Queue processing (Bull)
-- Real-time features (Socket.io)
+**Database connection failed:**
+```powershell
+# Kiểm tra PostgreSQL đang chạy
+docker ps | findstr postgres
 
-## 📚 Additional Resources
+# Kiểm tra DATABASE_URL trong .env
+```
 
-- [Express.js Documentation](https://expressjs.com/)
-- [TypeScript Documentation](https://www.typescriptlang.org/docs/)
-- [Prisma Documentation](https://www.prisma.io/docs/)
-- [JWT Best Practices](https://tools.ietf.org/html/rfc8725)
+**Redis connection failed:**
+```powershell
+# Redis là optional - không ảnh hưởng hệ thống
+# Hoặc kiểm tra Redis đang chạy
+docker ps | findstr redis
+```
+
+**npm install errors:**
+```powershell
+# Xóa và cài lại
+Remove-Item -Recurse -Force node_modules, package-lock.json
+npm install
+```
+
+---
+
+## 📄 License
+
+This project is licensed under the MIT License - see the [LICENSE](../LICENSE) file for details.
+
+---
+
+## 👥 Team
+
+**Nhóm 38 - Warehouse Management System**
+
+- [Danh sách thành viên]
+- Giảng viên hướng dẫn: [Tên giảng viên]
+- Môn học: [Tên môn học]
+- Năm học: 2024-2025
+
+---
+
+## 🙏 Acknowledgments
+
+- [Prisma](https://www.prisma.io/) - Amazing ORM
+- [Express.js](https://expressjs.com/) - Web framework
+- [TypeScript](https://www.typescriptlang.org/) - Type safety
+- [Docker](https://www.docker.com/) - Containerization
+
+---
+
+## 📞 Support
+
+Nếu có vấn đề, tạo issue trên GitHub hoặc liên hệ:
+- GitHub Issues: [Link to issues]
+- Email: [team email]
+
+---
+
+**⭐ Nếu project hữu ích, hãy star repo này!**
+
+**Made with ❤️ by Nhóm 38**

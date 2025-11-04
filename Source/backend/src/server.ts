@@ -146,7 +146,7 @@ class App {
     await this.connectDatabase();
     await this.connectRedis();
 
-    this.httpServer.listen(this.port, () => {
+    this.httpServer.listen(this.port, '0.0.0.0', () => {
       logger.info(`
         ╔════════════════════════════════════════════════════════╗
         ║                                                        ║

@@ -1,13 +1,9 @@
 import { Router } from 'express';
+import shippingController from '../controllers/shipping.controller';
 
 const router = Router();
 
-router.get('/', (_req, res) => {
-  res.json({ success: true, message: 'Shipping routes - To be implemented' });
-});
-
-router.post('/', (_req, res) => {
-  res.json({ success: true, message: 'Create shipment - To be implemented' });
-});
+router.get('/', shippingController.getAll.bind(shippingController));
+router.get('/track/:trackingNumber', shippingController.trackShipment.bind(shippingController));
 
 export default router;

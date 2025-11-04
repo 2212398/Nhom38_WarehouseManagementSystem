@@ -7,8 +7,8 @@ WORKDIR /app
 COPY package*.json ./
 COPY tsconfig.json ./
 
-# Install dependencies
-RUN npm ci --only=production && npm cache clean --force
+# Install ALL dependencies (including devDependencies for build)
+RUN npm ci && npm cache clean --force
 
 # Copy source code
 COPY . .
@@ -22,18 +22,23 @@ RUN npm run build
 # Production stage
 FROM node:18-alpine
 
+# Install build dependencies for native modules and OpenSSL for Prisma
+RUN apk add --no-cache python3 make g++ openssl openssl-dev
+
 WORKDIR /app
 
 # Copy package files
 COPY package*.json ./
 
-# Install production dependencies only
+# Install production dependencies only (will rebuild native modules)
 RUN npm ci --only=production && npm cache clean --force
 
 # Copy built files from builder
 COPY --from=builder /app/dist ./dist
-COPY --from=builder /app/node_modules ./node_modules
 COPY --from=builder /app/prisma ./prisma
+
+# Generate Prisma Client in production stage
+RUN npx prisma generate
 
 # Create uploads and logs directories
 RUN mkdir -p /app/uploads /app/logs

@@ -1,4 +1,5 @@
 import { Router } from 'express';
+import productController from '../controllers/product.controller';
 
 const router = Router();
 
@@ -12,24 +13,14 @@ const router = Router();
  *       200:
  *         description: List of products
  */
-router.get('/', (_req, res) => {
-  res.json({ success: true, message: 'Product routes - To be implemented' });
-});
+router.get('/', productController.getAll.bind(productController));
 
-router.post('/', (_req, res) => {
-  res.json({ success: true, message: 'Create product - To be implemented' });
-});
+router.post('/', productController.create.bind(productController));
 
-router.get('/:id', (_req, res) => {
-  res.json({ success: true, message: 'Get product by ID - To be implemented' });
-});
+router.get('/:id', productController.getById.bind(productController));
 
-router.put('/:id', (_req, res) => {
-  res.json({ success: true, message: 'Update product - To be implemented' });
-});
+router.put('/:id', productController.update.bind(productController));
 
-router.delete('/:id', (_req, res) => {
-  res.json({ success: true, message: 'Delete product - To be implemented' });
-});
+router.delete('/:id', productController.delete.bind(productController));
 
 export default router;

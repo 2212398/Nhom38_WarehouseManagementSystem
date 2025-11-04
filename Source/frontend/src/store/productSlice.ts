@@ -40,10 +40,12 @@ const productSlice = createSlice({
       })
       .addCase(fetchProducts.fulfilled, (state, action) => {
         state.loading = false;
-        state.items = action.payload.items;
-        state.total = action.payload.total;
-        state.page = action.payload.page;
-        state.pageSize = action.payload.pageSize;
+        // Backend returns { data: [...], pagination: {...} }
+        const response = action.payload as any;
+        state.items = response.data || response.items || [];
+        state.total = response.pagination?.total || response.total || 0;
+        state.page = response.pagination?.page || response.page || 1;
+        state.pageSize = response.pagination?.pageSize || response.pageSize || 10;
       })
       .addCase(fetchProducts.rejected, (state, action) => {
         state.loading = false;

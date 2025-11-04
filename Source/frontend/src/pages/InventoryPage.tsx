@@ -103,17 +103,30 @@ export const InventoryPage: React.FC = () => {
   const handleSaveAdjustment = async () => {
     try {
       setSaveError('');
+      
+      // Calculate new quantity
+      const currentQty = selectedItem?.quantity_on_hand || 0;
+      const adjustQty = parseInt(adjustmentData.quantity) || 0;
+      const newQty = adjustmentData.type === 'add' ? currentQty + adjustQty : currentQty - adjustQty;
+      
       // Mock API call - in real app, call backend API
       console.log('Adjusting inventory:', {
         itemId: selectedItem?.id,
-        adjustment: adjustmentData,
+        product: selectedItem?.product_name,
+        oldQuantity: currentQty,
+        adjustment: adjustQty,
+        type: adjustmentData.type,
+        newQuantity: newQty,
+        reason: adjustmentData.reason,
       });
+      
+      alert(`✅ Inventory Adjusted Successfully!\n\nProduct: ${selectedItem?.product_name}\nOld Quantity: ${currentQty}\nAdjustment: ${adjustmentData.type === 'add' ? '+' : '-'}${adjustQty}\nNew Quantity: ${newQty}\nReason: ${adjustmentData.reason || 'N/A'}\n\n(Note: This is a demo - changes are not persisted to database)`);
       
       setSaveSuccess(true);
       setTimeout(() => {
         handleCloseDialog();
         fetchInventory();
-      }, 1000);
+      }, 500);
     } catch (error: any) {
       setSaveError(error.response?.data?.message || 'Failed to adjust inventory');
     }
